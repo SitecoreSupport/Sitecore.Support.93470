@@ -4,13 +4,19 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Sitecore.Analytics.Rules.Conditions
+namespace Sitecore.Support.Analytics.Rules.Conditions
 {
   using System;
-  using System.Linq; 
+  using System.Linq;
+  using Sitecore.Analytics;
+  using Sitecore.Analytics.Core;
+  using Sitecore.Analytics.Data;
+  using Sitecore.Analytics.Model;
+  using Sitecore.Analytics.Tracking;
   using Sitecore.Diagnostics;
-  using Sitecore.Rules;
   using Sitecore.Rules.Conditions;
+  using Sitecore.Rules;
+  using System.Collections.Generic;
 
   /// <summary>Defines the when subitem of class.</summary>
   /// <typeparam name="T">The rule context.</typeparam>
@@ -44,19 +50,32 @@ namespace Sitecore.Analytics.Rules.Conditions
       Assert.ArgumentNotNull(ruleContext, "ruleContext");
       Assert.IsNotNull(Tracker.Current, "Tracker.Current is not initialized");
       Assert.IsNotNull(Tracker.Current.Session, "Tracker.Current.Session is not initialized");
-      Assert.IsNotNull(Tracker.Current.Session.Interaction, "Tracker.Current.Session.Interaction is not initialized");
-
       try
       {
         this.GoalGuid = new Guid(this.GoalId);
       }
       catch
       {
-        Log.Warn(string.Format("Could not convert value to guid: {0}", this.GoalId), this.GetType());
+        Log.Warn(string.Format("Could not convert value to guid: {0}", (object)this.GoalId), (object)this.GetType());
         return false;
       }
+      if (Tracker.Current.Session.Interaction != null)
+        return ((IEnumerable<Page>)Tracker.Current.Session.Interaction.Pages).Any<Page>((Func<Page, bool>)(page => page.PageEvents.Any<Sitecore.Analytics.Model.PageEventData>((Func<Sitecore.Analytics.Model.PageEventData, bool>)(e => e.PageEventDefinitionId == this.GoalGuid))));
+      var history = Tracker.Current.Contact.LoadHistorycalData(1);
+      if (history == null || history.Count<IInteractionData>() == 0) 
+      {
+        return false;
+      }
+      IInteractionData interactionData = history.First<IInteractionData>();
+      if (interactionData != null)
+        return ((IEnumerable<Page>)interactionData.Pages).SelectMany<Page, Sitecore.Analytics.Model.PageEventData>((Func<Page, IEnumerable<Sitecore.Analytics.Model.PageEventData>>)(page => page.PageEvents)).Any<Sitecore.Analytics.Model.PageEventData>((Func<Sitecore.Analytics.Model.PageEventData, bool>)(pageEvent =>
+        {
+          if (pageEvent.IsGoal)
+            return pageEvent.PageEventDefinitionId == this.GoalGuid;
+          return false;
+        }));
+      return false;
 
-      return Tracker.Current.Session.Interaction.Pages.Any(page => page.PageEvents.Any(e => e.PageEventDefinitionId == this.GoalGuid));
     }
 
     #endregion

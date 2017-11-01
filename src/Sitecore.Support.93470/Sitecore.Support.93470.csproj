@@ -65,11 +65,14 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analytics\Rules\Conditions\EngagementValuePointsCondition.cs" />
     <Compile Include="Analytics\Rules\Conditions\HasGoalCondition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Config\Include\zzz\Sitecore.Support.93470.config" />
+    <Content Include="App_Config\Include\zzz\Sitecore.Support.93470.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

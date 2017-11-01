@@ -1,9 +1,15 @@
 ﻿namespace Sitecore.Support.Analytics.Rules.Conditions
 {
+  using System;
+  using System.Linq;
   using Sitecore.Analytics;
+  using Sitecore.Analytics.Data;
+  using Sitecore.Analytics.Tracking;
   using Sitecore.Diagnostics;
   using Sitecore.Rules;
   using Sitecore.Rules.Conditions;
+  using System.Collections.Generic;
+
 
   /// <summary>Defines the when template is class.</summary>
   /// <typeparam name="T">The rule context.</typeparam>
@@ -28,12 +34,26 @@
     protected override bool Execute([NotNull] T ruleContext)
     {
       Assert.ArgumentNotNull(ruleContext, "ruleContext");
-      Assert.IsNotNull(Tracker.Current, "Tracker.Current is not initialized");
-      Assert.IsNotNull(Tracker.Current.Session, "Tracker.Current.Session is not initialized");
-      Assert.IsNotNull(Tracker.Current.Session.Interaction, "Tracker.Current.Session.Interaction is not initialized");
-
-      var value = Tracker.Current.Session.Interaction.Value;
-
+      var interaction = Tracker.Current.Session.Interaction;
+      int value;
+      if (interaction != null)
+      {
+        value = interaction.Value;
+      }
+      else
+      {
+        var history = Tracker.Current.Contact.LoadHistorycalData(1);
+        if (history == null || history.Count<IInteractionData>() == 0)
+        {
+          return false;
+        }
+        IInteractionData interactionData = history.First<IInteractionData>();
+        if (interactionData == null)
+        {
+          return false;          
+        }
+        value = interactionData.Value;
+      }
       var conditionOperator = this.GetOperator();
 
       switch (conditionOperator)
