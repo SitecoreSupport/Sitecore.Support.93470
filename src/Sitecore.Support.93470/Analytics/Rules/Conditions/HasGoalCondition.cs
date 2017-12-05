@@ -59,7 +59,7 @@ namespace Sitecore.Support.Analytics.Rules.Conditions
         Log.Warn(string.Format("Could not convert value to guid: {0}", (object)this.GoalId), (object)this.GetType());
         return false;
       }
-      if (Tracker.Current.Session.Interaction != null)
+      if (Tracker.Current.Session.Interaction != null && (Tracker.Current.Session.Interaction.Pages.Count() > 1 || Tracker.Current.Session.Interaction.CurrentPage.Url.Path != null))
         return ((IEnumerable<Page>)Tracker.Current.Session.Interaction.Pages).Any<Page>((Func<Page, bool>)(page => page.PageEvents.Any<Sitecore.Analytics.Model.PageEventData>((Func<Sitecore.Analytics.Model.PageEventData, bool>)(e => e.PageEventDefinitionId == this.GoalGuid))));
       var history = Tracker.Current.Contact.LoadHistorycalData(1);
       if (history == null || history.Count<IInteractionData>() == 0) 
