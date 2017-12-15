@@ -36,7 +36,7 @@
       Assert.ArgumentNotNull(ruleContext, "ruleContext");
       var interaction = Tracker.Current.Session.Interaction;
       int value;
-      if (interaction != null)
+      if (interaction != null && (interaction.Pages.Count() > 1 || interaction.CurrentPage.Url.Path != null))
       {
         value = interaction.Value;
       }
