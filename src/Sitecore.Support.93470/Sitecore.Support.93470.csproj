@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Analytics\Rules\Conditions\EngagementValuePointsCondition.cs" />
     <Compile Include="Analytics\Rules\Conditions\HasGoalCondition.cs" />
+    <Compile Include="Analytics\Rules\Conditions\ProfileCondition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
